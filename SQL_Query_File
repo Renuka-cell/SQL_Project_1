@@ -1,0 +1,399 @@
+--Create Tables
+DROP TABLE IF EXISTS Books;
+CREATE TABLE Books(
+Book_ID SERIAL PRIMARY KEY,
+Title VARCHAR(100),
+Author VARCHAR(100),
+Genre VARCHAR(50),
+Published_Year INT,
+Price NUMERIC(10,2),
+Stock INT
+);
+
+DROP TABLE IF EXISTS Customers;
+CREATE TABLE Customers(
+Customer_ID SERIAL PRIMARY KEY,
+Name VARCHAR(100),
+Email VARCHAR(100),
+Phone INT,
+City VARCHAR(100),
+Country VARCHAR(200)
+);
+
+--DROP TABLE IF EXISTS Orders;
+CREATE TABLE Orders(
+Order_ID SERIAL PRIMARY KEY,
+Customer_ID INT REFERENCES Customers(Customer_ID),
+Book_ID INT REFERENCES Books(Book_ID),
+Orders_Date DATE,
+Quantity INT,
+Total_Amount NUMERIC(10,2) 
+);
+
+SELECT * FROM Books;
+SELECT * FROM Customers;
+SELECT * FROM Orders;
+
+--insert data into Books Table
+COPY Books(Book_ID,Title,Author,Genre,Published_Year,Price,Stock)
+FROM 'C:\Program Files\PostgreSQL\17\SQL FIRST PROJECT\Books.csv'
+WITH (FORMAT csv,HEADER true);
+
+COPY Customers FROM 'C:\Program Files\PostgreSQL\17\SQL FIRST PROJECT\Customers.csv' DELIMITER',' CSV HEADER;
+
+COPY Orders FROM 'C:\Program Files\PostgreSQL\17\SQL FIRST PROJECT\Orders.csv' DELIMITER',' CSV HEADER;
+
+--1) Retrive all books in the "Fiction" genre
+SELECT * FROM Books WHERE Genre = 'Fiction';
+
+-- 2) Find books published after the year 1950:
+SELECT * FROM Books WHERE Published_Year > 1950;
+
+-- 3) List all customers from the Canada:
+SELECT * FROM Customers WHERE Country = 'Canada';
+
+-- 4) Show orders placed in November 2023:
+SELECT * FROM Orders 
+WHERE Orders_Date BETWEEN '2023-11-01' AND '2023-11-30';
+
+-- 5) Retrieve the total stock of books available:
+SELECT SUM(Stock) AS SUM_OF_STOCK FROM Books;
+
+-- 6) Find the details of the most expensive book:
+SELECT * FROM Books ORDER BY Price DESC LIMIT 1;
+
+-- 7) Show all customers who ordered more than 1 quantity of a book:
+SELECT * FROM Customers LEFT JOIN Orders ON Customers.Customer_ID = Orders.Customer_ID WHERE Orders.Quantity>1;
+
+-- 8) Retrieve all orders where the total amount exceeds $20:
+SELECT * FROM Orders WHERE Total_Amount > 20;
+
+-- 9) List all genres available in the Books table:
+SELECT DISTINCT(Genre) AS Genre FROM Books;
+
+-- 10) Find the book with the lowest stock:
+SELECT * FROM Books ORDER BY Stock LIMIT 1;
+
+-- 11) Calculate the total revenue generated from all orders:
+SELECT SUM(Total_Amount) AS Revene FROM Orders;
+
+
+--ADVANCE LEVEL
+
+-- 1) Retrieve the total number of books sold for each genre:
+
+SELECT B.Genre AS Genre,SUM(O.Quantity) AS Quantity_Sold
+FROM Orders O
+JOIN Books B
+ON O.Book_ID = B.Book_ID
+GROUP BY B.Genre;
+
+-- 2) Find the average price of books in the "Fantasy" genre:
+SELECT AVG(Price) AS Fantasy_Genre_Book
+FROM Books
+WHERE Genre = 'Fantasy';
+
+-- 3) List customers who have placed at least 2 orders:
+
+SELECT O.Customer_ID,C.Name,COUNT(O.Order_ID) AS Order_Count
+FROM Orders O
+JOIN Customers C
+ON O.Customer_ID = C.Customer_ID
+GROUP BY O.Customer_id,C.Name
+HAVING COUNT(O.Order_ID) >= 2;
+
+-- 4) Find the most frequently ordered book:
+SELECT B.Title AS Book_name,O.Orders_Date AS Ordered_Date
+FROM Books B
+JOIN Orders O
+ON B.Book_ID = O.Book_ID
+ORDER BY Orders_Date DESC;
+-------------(FOR LIMITING THE RESULT)---------------------------------
+SELECT B.Title, COUNT(O.Order_ID) AS Times_Ordered
+FROM Orders O
+JOIN Books B ON O.Book_ID = B.Book_ID
+GROUP BY B.Title
+ORDER BY Times_Ordered DESC
+LIMIT 1;
+
+-- 5) Show the top 3 most expensive books of 'Fantasy' Genre :
+SELECT Title,Price FROM Books WHERE Genre = 'Fantasy' ORDER BY Price DESC LIMIT 3;
+
+-- 6) Retrieve the total quantity of books sold by each author:
+SELECT DISTINCT(B.Author) AS Author,SUM(O.Quantity) AS Total_Quantity
+FROM Books B
+JOIN Orders O
+ON B.Book_ID = O.Book_ID
+GROUP BY B.Author;
+
+-- 7) List the cities where customers who spent over $30 are located:
+SELECT DISTINCT(C.City) 
+FROM Customers C 
+JOIN Orders O
+ON C.Customer_ID = O.Customer_ID
+WHERE O.Total_Amount > 30;
+
+-- 8) Find the customer who spent the most on orders:
+SELECT C.Customer_ID,C.Name,SUM(O.Total_Amount) AS Total_Spent
+FROM Orders O
+JOIN Customers C ON O.Customer_ID = C.Customer_ID
+GROUP BY C.Customer_ID,C.Name
+ORDER BY Total_Spent DESC;
+
+--9) Calculate the stock remaining after fulfilling all orders:
+SELECT B.Book_ID,B.Title,B.Stock AS STOCK_Avalible_Quantity,COALESCE(SUM(O.Quantity),0) AS Ordered_quantity,B.Stock - COALESCE(SUM(O.Quantity),0) AS Remaining
+FROM Books B
+LEFT JOIN Orders O
+ON B.Book_ID = O.Order_ID
+GROUP BY B.Book_ID
+ORDER BY B.Book_ID;
+----------------------------(OR)---------------------------------------
+
+SELECT B.Book_ID, B.Title, B.Stock AS Original_Stock,
+       COALESCE(SUM(O.Quantity), 0) AS Ordered_Quantity,
+       B.Stock - COALESCE(SUM(O.Quantity), 0) AS Remaining_Stock
+FROM Books B
+LEFT JOIN Orders O ON B.Book_ID = O.Book_ID
+GROUP BY B.Book_ID, B.Title, B.Stock
+ORDER BY B.Book_ID;
+
+-------------------------------------------------SOME MORE QUESTIONS------------------------------------------------------------------------------s
+
+--Basic SQL Practice Questions
+--1. Retrieve all customers whose name starts with the letter 'A'.
+SELECT * FROM Customers WHERE Name LIKE 'A%';
+
+--2. List books that cost more than $15 but less than $50.
+SELECT * FROM Books WHERE Price >15 AND Price <50;
+
+--3. Find the names and prices of all books sorted in descending order of price.
+SELECT Title,Price FROM Books ORDER BY Price DESC;
+
+--4. Count how many books are available in each genre.
+SELECT COUNT(Title) AS Number_Of_Books,Genre FROM Books GROUP BY Genre;
+
+--5.Display all customer names and their corresponding countries.
+SELECT Name,Country FROM Customers;
+
+--6.Find all books published in or before the year 2000.
+SELECT * FROM Books WHERE Published_Year <= 2000;
+
+--7.Get all orders where quantity ordered is exactly 1.
+SELECT * FROM Orders WHERE Quantity = 1;
+
+--8.Show distinct countries from where customers are.
+SELECT DISTINCT(Country) AS Country FROM Customers;
+
+--9.Display the name and email of all customers who are from India.
+SELECT Name,Email FROM Customers WHERE Country = 'India';
+
+--10.List books where stock is between 5 and 10 (inclusive).
+SELECT Title,Stock FROM Books WHERE Stock BETWEEN 5 AND 10;
+
+--"Intermediate SQL Practice Questions"
+--11.Find the total number of orders placed by each customer.
+SELECT C.Customer_ID,C.Name,SUM(O.Quantity) AS Total_orders
+FROM Customers C
+JOIN Orders O
+ON C.Customer_ID = O.Customer_ID
+GROUP BY C.Customer_ID,C.Name;
+
+--12.List books that were never ordered.
+SELECT Title
+FROM Books
+WHERE Book_ID NOT IN (SELECT DISTINCT Book_ID FROM Orders);
+
+--13.Display the most recent order placed.
+SELECT B.Title,O.Orders_Date
+FROM Books B
+JOIN Orders O
+ON B.Book_ID = O.Book_ID
+ORDER BY O.Orders_Date DESC
+LIMIT 1;
+
+--14.Calculate the average price of books in each genre.
+SELECT AVG(Price) AS Avg_Price,Genre
+FROM Books
+GROUP BY Genre;
+
+--15.Show each customer’s total spending across all their orders.
+SELECT C.Name,SUM(O.Total_Amount) AS Total_expense
+FROM Customers C
+JOIN Orders O
+ON C.Customer_ID = O.Customer_ID
+GROUP BY C.Name;
+
+--16.Find the highest selling book (by total quantity ordered).
+SELECT B.Title,SUM(O.Quantity) AS Ordered_Quantity
+FROM Books B
+JOIN Orders O
+ON B.Book_ID = O.Book_ID
+GROUP BY B.Title
+ORDER BY Ordered_Quantity DESC
+LIMIT 1;
+
+--17.List customers who have never placed an order.
+SELECT Customer_ID,Name
+FROM Customers
+WHERE(Customer_ID) NOT IN (SELECT DISTINCT Customer_ID FROM Orders)
+
+--18.Show the number of customers in each city.
+SELECT City,COUNT(*) AS Number_of_Customers
+FROM Customers
+GROUP BY City;
+
+--19.Retrieve customers who ordered more than 5 books in total.
+SELECT C.Customer_ID, C.Name, SUM(O.Quantity) AS Total_Quantity
+FROM Customers C
+JOIN Orders O ON C.Customer_ID = O.Customer_ID
+GROUP BY C.Customer_ID, C.Name
+HAVING SUM(O.Quantity) > 5;
+
+
+--20.For each author, show the total number of books written by them.
+SELECT Author,COUNT(*) AS Total_Books_Written
+FROM Books
+GROUP BY Author;
+
+--"Advanced SQL Practice Questions"
+--21.Rank books by total revenue generated from orders.
+SELECT 
+    B.Book_ID,
+    B.Title,
+    SUM(O.Total_Amount) AS Total_Revenue,
+    RANK() OVER (ORDER BY SUM(O.Total_Amount) DESC) AS Revenue_Rank
+FROM Books B
+JOIN Orders O ON B.Book_ID = O.Book_ID
+GROUP BY B.Book_ID, B.Title
+ORDER BY Revenue_Rank;
+
+--22.List top 3 customers by total amount spent.
+SELECT C.Customer_ID,C.Name,SUM(O.Total_Amount) AS Total_Amount,
+ROW_NUMBER() OVER(ORDER BY SUM(O.Total_Amount) DESC) Customer_Rank
+FROM Customers C
+JOIN Orders O
+ON C.Customer_ID = O.Customer_ID
+GROUP BY C.Customer_ID,C.Name
+ORDER BY Customer_Rank
+LIMIT 3;
+
+--23.Retrieve months with no orders in 2023.
+WITH All_Months AS(
+	SELECT TO_DATE(month_text,'YYYY-MM') AS Month_Start
+	FROM(
+		VALUES
+			('2023-01'), ('2023-02'), ('2023-03'), ('2023-04'),
+	        ('2023-05'), ('2023-06'), ('2023-07'), ('2023-08'),
+	        ('2023-09'), ('2023-10'), ('2023-11'), ('2023-12')
+	) AS m(month_text)
+),
+
+Ordered_Months AS(
+	SELECT DATE_TRUNC('month',Orders_Date) AS Order_Month
+	FROM Orders
+    WHERE EXTRACT(YEAR FROM Orders_Date) = 2023
+    GROUP BY DATE_TRUNC('month', Orders_Date)
+)
+SELECT TO_CHAR(a.Month_Start, 'Month') AS Missing_Month
+FROM All_Months a
+LEFT JOIN Ordered_Months o
+ON a.Month_Start = o.Order_Month
+WHERE o.Order_Month IS NULL;
+
+--24.List books with below average price in their genre.
+SELECT B1.Book_ID, B1.Title, B1.Genre, B1.Price
+FROM Books B1
+JOIN (
+    SELECT Genre, AVG(Price) AS Avg_Price
+    FROM Books
+    GROUP BY Genre
+) AS GenreAvg
+ON B1.Genre = GenreAvg.Genre
+WHERE B1.Price < GenreAvg.Avg_Price;
+
+
+--25. Find customers who ordered the same book more than once.
+SELECT 
+    Customer_ID, 
+    Book_ID, 
+    COUNT(*) AS Times_Ordered
+FROM Orders
+GROUP BY Customer_ID, Book_ID
+HAVING COUNT(*) > 1;
+
+
+--26.Get the month-wise revenue summary for 2022 and 2023 side-by-side.
+WITH Monthly_Revenue AS (
+    SELECT 
+        EXTRACT(MONTH FROM Orders_Date) AS Month,
+        EXTRACT(YEAR FROM Orders_Date) AS Year,
+        SUM(Total_Amount) AS Revenue
+    FROM Orders
+    WHERE EXTRACT(YEAR FROM Orders_Date) IN (2022, 2023)
+    GROUP BY EXTRACT(YEAR FROM Orders_Date), EXTRACT(MONTH FROM Orders_Date)
+)
+
+SELECT 
+    Month,
+    COALESCE(SUM(CASE WHEN Year = 2022 THEN Revenue END), 0) AS Revenue_2022,
+    COALESCE(SUM(CASE WHEN Year = 2023 THEN Revenue END), 0) AS Revenue_2023
+FROM Monthly_Revenue
+GROUP BY Month
+ORDER BY Month;
+
+
+--27.Identify duplicate customer emails if any exist.
+SELECT 
+    Email, 
+    COUNT(*) AS Count_Of_Use
+FROM Customers
+GROUP BY Email
+HAVING COUNT(*) > 1;
+
+
+--28.Create a report that shows for each customer: name, number of orders, and total amount spent.
+SELECT 
+    C.Customer_ID,
+    C.Name,
+    COUNT(O.Order_ID) AS Number_Of_Orders,
+    SUM(O.Total_Amount) AS Total_Spent
+FROM Customers C
+JOIN Orders O ON C.Customer_ID = O.Customer_ID
+GROUP BY C.Customer_ID, C.Name
+ORDER BY Total_Spent DESC;
+
+--29.Show authors whose books have never been ordered.
+SELECT DISTINCT B.Author
+FROM Books B
+LEFT JOIN Orders O ON B.Book_ID = O.Book_ID
+WHERE O.Book_ID IS NULL;
+
+
+--30.Calculate the average number of days between a customer’s orders.
+WITH Customer_Order_Gaps AS (
+    SELECT 
+        Customer_ID,
+        Orders_Date,
+        LAG(Orders_Date) OVER (PARTITION BY Customer_ID ORDER BY Orders_Date) AS Previous_Order_Date
+    FROM Orders
+),
+Customer_Gap_Days AS (
+    SELECT 
+        Customer_ID,
+        (Orders_Date - Previous_Order_Date)::INT AS Days_Between
+    FROM Customer_Order_Gaps
+    WHERE Previous_Order_Date IS NOT NULL
+)
+
+SELECT 
+    Customer_ID,
+    AVG(Days_Between) AS Avg_Days_Between_Orders
+FROM Customer_Gap_Days
+GROUP BY Customer_ID;
+
+
+
+
+
+
+
