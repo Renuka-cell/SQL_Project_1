@@ -41,7 +41,7 @@ To get started with this project on your local system, follow these steps:
 Open your terminal and run:
 
 ```bash
-git clone https://github.com/yourusername/sql-query-collection.git
+git clone https://github.com/Renuka-cell/SQL_Project_1.git
 cd sql-query-collection
 ```
 
