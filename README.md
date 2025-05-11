@@ -77,25 +77,46 @@ psql -U postgres -d sql_practice -f path/to/sample_schema.sql
 
 ## Database Schema
 
-This project does not depend on a single fixed database schema.
+This project does not depend on a specific fixed schema. However, to practice the queries effectively, you can create your own sample tables or use sample datasets that you might already have in your PostgreSQL instance.
 
-However, to practice the queries effectively, it is recommended to use:
-- PostgreSQL’s sample databases like:
-  - `dvdrental` (video rental store database)
-  - `employees` (HR data)
-  - `world` (global data)
-- You can also create your own simple tables like `students`, `orders`, `products`, etc., for practice.
+Some commonly used example tables could be:
+- `students` (with fields like `student_id`, `first_name`, `last_name`, `dob`, etc.)
+- `employees` (with fields like `employee_id`, `name`, `position`, `salary`, etc.)
+- `orders` (with fields like `order_id`, `order_date`, `customer_id`, `amount`, etc.)
 
-Each query file may include brief notes on the table structure it was tested on.
+You can also use PostgreSQL’s sample databases like:
+- `dvdrental` (video rental store database)
+- `employees` (HR data)
+
+If you'd like to use these datasets, you can load them into your database for testing.
+
+### Example Table: `students`
+| student_id | first_name | last_name | dob        |
+|------------|------------|-----------|------------|
+| 1          | John       | Doe       | 2000-05-15 |
+| 2          | Jane       | Smith     | 1999-07-23 |
+
+### Example Table: `orders`
+| order_id | order_date | customer_id | amount |
+|----------|------------|-------------|--------|
+| 101      | 2022-01-15 | 1           | 250    |
+| 102      | 2022-02-20 | 2           | 150    |
 
 ## Contributing
+
+Contributions to the SQL Query Collection are welcome!
+
 1. Fork the repository.
-2. Create your feature branch (`git checkout -b feature-name`).
-3. Commit your changes (`git commit -m 'Add some feature'`).
-4. Push to the branch (`git push origin feature-name`).
-5. Open a Pull Request.
+2. Create your own branch (`git checkout -b new-query`).
+3. Add your new SQL queries or examples. 
+4. Make sure your queries are clear and well-commented.
+5. Test your queries before submitting.
+6. Commit your changes (`git commit -m 'Add new SQL query for joins'`).
+7. Push your branch (`git push origin new-query`).
+8. Open a pull request.
+
+Feel free to contribute by adding new queries, improving existing ones, or fixing any mistakes.
 
 ## Contact
-- **Your Name**
-- **your.email@example.com**
+- **Renuka Biradar**
 - [GitHub Profile](https://github.com/yourusername)
