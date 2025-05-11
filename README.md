@@ -53,16 +53,7 @@ cd sql-query-collection
 CREATE DATABASE sql_practice;
 ```
 
-### 4. Load Sample Tables (Optional)
-
-- Some queries may require basic tables like `students`, `employees`, `orders`, etc.
-- Use the provided `.sql` files (in the `/schemas` or `/examples` folder, if available) to create and populate these tables.
-
-```bash
-psql -U postgres -d sql_practice -f path/to/sample_schema.sql
-```
-
-### 5. Run and Practice Queries
+### 4. Run and Practice Queries
 
 - Open the `.sql` files in any SQL editor or PostgreSQL client (like pgAdmin, DBeaver, or VS Code with SQL extension).
 - Copy and run queries to understand their functionality.
