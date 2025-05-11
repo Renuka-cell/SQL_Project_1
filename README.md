@@ -110,4 +110,4 @@ Feel free to contribute by adding new queries, improving existing ones, or fixin
 
 ## Contact
 - **Renuka Biradar**
-- [GitHub Profile](https://github.com/yourusername)
+- [GitHub Profile](https://github.com/Renuka-cell/SQL_Project_1.git)
